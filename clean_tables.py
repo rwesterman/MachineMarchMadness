@@ -4,6 +4,7 @@ from pprint import pprint
 
 def get_xl_data():
     df_dict = pd.read_excel("KenPom_Rankings.xlsx", sheet_name = None, header = 0)
+
     return df_dict
 
 def remove_unranked(df):
@@ -52,4 +53,3 @@ if __name__ == '__main__':
         df_to_csv(year, df)
         # replace the dataframe in df_dict with the altered dataframe
         df_dict[year] = new_df
-
