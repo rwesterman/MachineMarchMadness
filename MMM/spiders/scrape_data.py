@@ -1,5 +1,3 @@
-# Testing local GIT
-
 import scrapy
 import os
 
@@ -34,13 +32,6 @@ class KenpomSpider(scrapy.Spider):
                 break
             else:
                 header_cols.append(x)
-        ...
-        # Create a dictionary of key value pairs in the form of key = column name, value = list of
-        # every value in that column, in order. Ex: {'Rk':[1,2,3,4,5,6,7,...]}
-
-        # xpaths = ['//tr/td[@class="hard_left"]/text()', #Rank
-        #           '//tr/td[@class="next_left"]/a/text()', #School
-        #           '//tr/td[@class="next_left"]/span[@class="seed"/text()']
 
         # # Todo: Create list of xpaths to each column in the table, then iterate through them to get the data similar to below
         # #get xpath to table body
