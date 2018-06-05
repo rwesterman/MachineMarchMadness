@@ -16,11 +16,24 @@ def standardize_teams(match_df, kp_df):
 
     kp_team = kp_df.loc[:,"Team"]
 
-    find_differences(team1, team2, kp_team)
-
     # Change all teams that end with St to St. in Match Data
     team1 = team1.apply(normalize_state)
     team2 = team2.apply(normalize_state)
+
+    find_differences(team1, team2, kp_team)
+
+    team1 = team1.apply(change_outliers)
+    team2 = team2.apply(change_outliers)
+
+    match_df["Team"] = team1
+    match_df["Team.1"] = team2
+
+    team1 = match_df.loc[:,"Team"]
+    team2 = match_df.loc[:,"Team.1"]
+
+    find_differences(team1, team2, kp_team)
+
+    # match_df.to_csv("Training_Data\\Match_Data.csv")
 
 
 def normalize_state(team):
@@ -35,7 +48,35 @@ def change_outliers(team):
     outliers = {"Miami": "Miami FL",
                 "Long Island Brooklyn": "LIU Brooklyn",
                 "Central Connecticut St.": "Central Connecticut",
+                "St Josephs": "Saint Joseph's",
+                "St Marys": "Saint Mary's",
+                "St Peters": "Saint Peter's",
+                "St Johns": "St. John's",
+                "St Bonaventure": "St. Bonaventure",
+                "Southern Mississippi":"Southern Miss",
+                "Stephen F Austin": "Stephen F. Austin",
+                "Texas A&M Corpus Christi":"Texas A&M Corpus Chris",
+                "Cal Irvine": "UC Irvine",
+                "Santa Barbara":"UC Santa Barbara",
+                "Central Florida":"UCF",
+                "Texas Arlington":"UT Arlington",
+                "Texas San Antonio":"UTSA",
+                "Pennsylvania": "Penn",
+                "Miami Ohio": "Miami OH",
+                "Loyola Maryland": "Loyola MD",
+                "Middle Tennessee State":"Middle Tennessee",
+                "Mount St Marys": "Mount St. Mary's",
+                "NC State":"North Carolina St.",
+                "St Louis": "Saint Louis",
+                "Ole Miss": "Mississippi",
+                "Wisconsin Milwaukee":"Milwaukee",
+                "Middle Tennessee St.":"Middle Tennessee"
                 }
+
+    if team in outliers:
+        return outliers[team]
+    else:
+        return team
 
 def find_differences(m_team1, m_team2, kp_team):
     """
@@ -56,6 +97,7 @@ def find_differences(m_team1, m_team2, kp_team):
     outliers = kp_set - match_set
     #
     pprint(outliers)
+    return outliers
 
 
 

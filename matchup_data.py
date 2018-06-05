@@ -28,6 +28,7 @@ def associate_data(match_data, kenpom_df, samples):
     # Todo: tie together data on teams from kenpom rankings and match results
     # Access row x with df.iloc[x], then column name to get value
     # Since "Year" is index, need to use workaround shown below with df.index.tolist()[x]
+    
     match_list = []
     for x in range(samples):
         # print(x)
@@ -48,6 +49,7 @@ def associate_data(match_data, kenpom_df, samples):
         print(kp_df[(kp_df["Team"] == match_list[x]["Team1"]) | (kp_df["Team"] == match_list[x]["Team2"])])
 
 
+
 def import_kenpom_df():
     kp_comp = pd.read_csv("Training_Data\\KenPom_Complete.csv", index_col = "Year")
     return kp_comp
@@ -58,7 +60,7 @@ if __name__ == '__main__':
     # Ole Miss vs Mississippi
     samples = 10
     df = get_match_data()
-    data_2002 = get_year_data(2002, df)
+    data_2002 = get_year_data(2008, df)
     kp_comp = import_kenpom_df()
     datum = data_2002.sample(samples)
     associate_data(datum, kp_comp, samples)
