@@ -4,8 +4,6 @@ from torch.utils.data import DataLoader
 
 from dataload import Match_Scores, Match_Winners
 
-
-
 class Lin_Sig(torch.nn.Module):
 
     def __init__(self, num_inputs):
@@ -33,7 +31,6 @@ class Lin_Sig(torch.nn.Module):
         out4 = self.relu(self.lin4(out3))
         out5 = self.relu(self.lin5(out4))
         out6 = self.relu(self.lin6(out5))
-        # out3 = self.sigmoid(self.lin3(out2))
         y_pred = self.sigmoid(self.lin7(out6))
 
         return y_pred
@@ -67,7 +64,7 @@ def linsig_train(training_loader, num_inputs, num_epochs):
 
             # Print loss for every 10th batch
             # if i % 10 == 0 and epoch % 5 == 0:
-            print(epoch, i, loss.data[0])
+            print("Epoch: {}, batch #: {}, loss: {:.3f}".format(epoch, i, loss.item()))
 
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
@@ -118,7 +115,8 @@ if __name__ == '__main__':
     # Load in the match data
     # Setting test_diff to true means we're only looking at one input, "Eff_Diff"
     test_sig(r"./Training_Data/Training_Set.csv", 5)
-    test_sig(r"./Training_Data/Training_Set.csv", 50)
-    test_sig(r"./Training_Data/Training_Set.csv", 500)
+    test_sig(r"./Training_Data/Training_Set.csv", 100)
+    #test_sig(r"./Training_Data/Training_Set.csv", 500)
+	test_sig(r"./Training_Data/Training_Set.csv", 2000)
 
 
