@@ -1,3 +1,6 @@
 *.idea
 *.iml
 *.xml
+*.pyc
+*.pyc
+Training_Data/Practice_Training_Set.xlsx

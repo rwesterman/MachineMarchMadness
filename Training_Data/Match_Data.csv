@@ -381,7 +381,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 1991,1,1,West,2,93,Arizona,St Francis,80,15
 1991,1,1,West,3,71,Seton Hall,Pepperdine,51,14
 1991,1,1,West,4,82,Utah,South Alabama,72,13
-1991,1,1,West,5,60,Michigan St.,Wisconsin Green Bay,58,12
+1991,1,1,West,5,60,Michigan St.,Green Bay,58,12
 1991,1,1,West,6,56,New Mexico St.,Creighton,64,11
 1991,1,1,West,7,48,Virginia,BYU,61,10
 1991,1,1,West,8,70,Georgetown,Vanderbilt,60,9
@@ -570,7 +570,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 1994,1,1,West,2,81,Arizona,Loyola MD,55,15
 1994,1,1,West,3,67,Louisville,Boise St.,58,14
 1994,1,1,West,4,92,Syracuse,Hawaii,78,13
-1994,1,1,West,5,57,California,Wisconsin Green Bay,61,12
+1994,1,1,West,5,57,California,Green Bay,61,12
 1994,1,1,West,6,74,Minnesota,Southern Illinois,60,11
 1994,1,1,West,7,57,Virginia,New Mexico,54,10
 1994,1,1,West,8,72,Cincinnati,Wisconsin,80,9
@@ -601,7 +601,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 1994,2,1,West,1,109,Missouri,Wisconsin,96,9
 1994,2,1,West,2,71,Arizona,Virginia,58,7
 1994,2,1,West,3,60,Louisville,Minnesota,55,6
-1994,2,1,West,4,64,Syracuse,Wisconsin Green Bay,59,12
+1994,2,1,West,4,64,Syracuse,Green Bay,59,12
 1994,2,2,Midwest,1,85,Arkansas,Georgetown,73,9
 1994,2,2,Midwest,2,87,Massachusetts,Maryland,95,10
 1994,2,2,Midwest,3,84,Michigan,Texas,79,6
@@ -631,7 +631,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 1994,6,1,Championship,1,76,Arkansas,Duke,72,2
 1995,1,1,Midwest,1,82,Kansas,Colgate,68,16
 1995,1,1,Midwest,2,79,Arkansas,Texas Southern,78,15
-1995,1,1,Midwest,3,49,Purdue,Wisconsin Green Bay,48,14
+1995,1,1,Midwest,3,49,Purdue,Green Bay,48,14
 1995,1,1,Midwest,4,96,Virginia,Nicholls St.,72,13
 1995,1,1,Midwest,5,62,Arizona,Miami OH,71,12
 1995,1,1,Midwest,6,77,Memphis,Louisville,56,11
@@ -723,7 +723,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 1996,1,4,Midwest,5,74,Iowa St.,California,64,12
 1996,1,4,Midwest,6,82,Louisville,Tulsa,80,11
 1996,1,4,Midwest,7,76,Michigan,Texas,80,10
-1996,1,4,Midwest,8,48,Wisconsin Green Bay,Virginia Tech,61,9
+1996,1,4,Midwest,8,48,Green Bay,Virginia Tech,61,9
 1996,2,1,Southeast,1,95,Connecticut,Eastern Michigan,81,9
 1996,2,1,Southeast,2,78,Cincinnati,Temple,65,7
 1996,2,1,Southeast,3,103,Georgia Tech,Boston College,89,11
@@ -1962,7 +1962,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 2016,1,1,South,8,67,Colorado,Connecticut,74,9
 2016,1,2,West,1,91,Oregon,Holy Cross,52,16
 2016,1,2,West,2,82,Oklahoma,Cal St. Bakersfield,68,15
-2016,1,2,West,3,92,Texas A&M,Wisconsin Green Bay,65,14
+2016,1,2,West,3,92,Texas A&M,Green Bay,65,14
 2016,1,2,West,4,93,Duke,UNC Wilmington,85,13
 2016,1,2,West,5,75,Baylor,Yale,79,12
 2016,1,2,West,6,72,Texas,Northern Iowa,75,11
@@ -2086,7 +2086,7 @@ Year,Round,Region Number,Region Name,Seed,Score,Team,Team.1,Score.1,Seed.1
 2018,1,1,South,6,62,Miami FL,Loyola Chicago,64,11
 2018,1,1,South,7,87,Nevada,Texas,83,10
 2018,1,1,South,8,59,Creighton,Kansas St.,69,9
-2018,1,2,West,1,102,Xavier,North Carolina Central,83,16
+2018,1,2,West,1,102,Xavier,Texas Southern,83,16
 2018,1,2,West,2,84,North Carolina,Lipscomb,66,15
 2018,1,2,West,3,61,Michigan,Montana,47,14
 2018,1,2,West,4,68,Gonzaga,UNC Greensboro,64,13

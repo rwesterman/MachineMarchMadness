@@ -1,6 +1,5 @@
 import pandas as pd
 import re
-from matchup_data import get_match_data, import_kenpom_df
 from pprint import pprint
 
 def standardize_teams(match_df, kp_df):
@@ -33,7 +32,7 @@ def standardize_teams(match_df, kp_df):
 
     find_differences(team1, team2, kp_team)
 
-    # match_df.to_csv("Training_Data\\Match_Data.csv")
+    match_df.to_csv("Training_Data\\Match_Data.csv", index = False)
 
 
 def normalize_state(team):
@@ -70,9 +69,11 @@ def change_outliers(team):
                 "St Louis": "Saint Louis",
                 "Ole Miss": "Mississippi",
                 "Wisconsin Milwaukee":"Milwaukee",
-                "Middle Tennessee St.":"Middle Tennessee"
+                "Middle Tennessee St.":"Middle Tennessee",
+                "Wisconsin Green Bay": "Green Bay"
                 }
 
+    # If parameter team is an outlier, return the replacement function
     if team in outliers:
         return outliers[team]
     else:
@@ -98,8 +99,3 @@ def find_differences(m_team1, m_team2, kp_team):
     #
     pprint(outliers)
     return outliers
-
-
-
-if __name__ == '__main__':
-    standardize_teams(get_match_data(), import_kenpom_df())
