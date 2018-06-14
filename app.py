@@ -3,6 +3,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
 from dataload import Match_Scores, Match_Winners
+import sys
 
 class Lin_Sig(torch.nn.Module):
 
@@ -114,9 +115,19 @@ if __name__ == '__main__':
 
     # Load in the match data
     # Setting test_diff to true means we're only looking at one input, "Eff_Diff"
-    test_sig(r"./Training_Data/Training_Set.csv", 5)
-    test_sig(r"./Training_Data/Training_Set.csv", 100)
-    #test_sig(r"./Training_Data/Training_Set.csv", 500)
-	test_sig(r"./Training_Data/Training_Set.csv", 2000)
+    # test_sig(r"./Training_Data/Training_Set.csv", 5)
+    # test_sig(r"./Training_Data/Training_Set.csv", 100)
+    # test_sig(r"./Training_Data/Training_Set.csv", 2000)
+    try:
+        epochs = int(input("How many epochs should be run?: "))
+    except (TypeError,ValueError) as e:
+        print("Please enter a positive integer.")
+        epochs = int(input("How many epochs should be run?: "))
 
+    if epochs > 0:
+        print("Running {} epochs".format(epochs))
+        test_sig(r"./Training_Data/Training_Set.csv", epochs)
+    else:
+        print("Defaulting to 100 epochs.")
+        test_sig(r"./Training_Data/Training_Set.csv", 100)
 

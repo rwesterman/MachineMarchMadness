@@ -4,4 +4,6 @@
 *.pyc
 *.pyc
 Training_Data/Practice_Training_Set.xlsx
-__pychache__*
+*__pychache__*
+
+Accuracy_results.txt
