@@ -3,7 +3,6 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
 from dataload import Match_Winners
-from test_model import validate_sig
 
 
 class Lin_Sig(torch.nn.Module):
@@ -73,12 +72,12 @@ def linsig_train(training_loader, num_inputs, num_epochs):
             loss.backward()
             optimizer.step()
 
-    dataset = Match_Winners(r"./Training_Data/Training_Set.csv", test_diff = False)
-    num_inputs = dataset.x_data.shape[1]
-    training_loader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers = 2)
-    accuracy = validate_sig(training_loader, model)
-    with open("Accuracy_results.txt", 'a') as f:
-        f.write("{} inputs, {} Epochs, {} Accuracy\n".format(num_inputs, num_epochs, accuracy))
+    # dataset = Match_Winners(r"./Training_Data/Training_Set.csv", test_diff = False)
+    # num_inputs = dataset.x_data.shape[1]
+    # training_loader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers = 2)
+    # accuracy = validate_sig(training_loader, model)
+    # with open("Accuracy_results.txt", 'a') as f:
+    #     f.write("{} inputs, {} Epochs, {} Accuracy\n".format(num_inputs, num_epochs, accuracy))
 
 
     save_path = ".\\Models\\{}_epochs".format(num_epochs)

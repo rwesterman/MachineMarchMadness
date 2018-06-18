@@ -5,7 +5,6 @@ from torch.autograd import Variable
 import training
 from dataload import Match_Winners
 
-
 def get_testdata():
     """
 
@@ -39,7 +38,8 @@ def validate_sig(val_data, model):
 
         total += 1
 
-        print("Predicted winner is {:.1f}".format(y_pred.item()))
+        print("Predicted winner is {:.1f}, actual winner is {}".format(y_pred.item(), labels.item()))
+
     accuracy = correct/total
     print("Percentage correct: {}".format(accuracy))
     return accuracy

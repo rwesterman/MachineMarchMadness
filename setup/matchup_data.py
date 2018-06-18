@@ -79,8 +79,6 @@ def associate_data(match_data, kenpom_df):
     # Add column showing score diff. This will be labeled result data
     final_data["Score_Diff"] = final_data['Score1'] - final_data['Score2']
 
-
-
     # determine game winner (0 or 1, for team1 or team2 respectively) and add to final_data
     # If score1 > score2, team1 wins. Else team 2 wins
     if final_data['Score1'] > final_data['Score2']:
