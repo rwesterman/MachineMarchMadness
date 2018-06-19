@@ -15,6 +15,18 @@ import logging
 
 # Note: Year selection occurs at the kenpom_df() level. Everything else follows from that year
 
+def extrapolate_seed(seed, region):
+    """
+    Return the 64_bracket seed value for a given seed and region
+    :param seed: int, 16 team seed
+    :param region: int, region number (1-4)
+    :return: 64_bracket seed value
+    """
+    # to extraopolate to 64 team seed, take current seed and add (16 * (region number - 1))
+    # This works because regions are numbered 1 through 4, so region 1 keeps its seed numbers, each other region is 16 total seeds later
+    new_seed = seed + (16 * (region - 1))
+    return new_seed
+
 def get_matchup_data(team1, team2, df):
     """
     :param team1: Name of team1 in matchup
@@ -72,8 +84,7 @@ def match_teams_seeds(match_path, year):
     """
     :param match_path: filepath for match_data.csv
     :param year: year of tournament
-    :return: Dict of dicts. Top level dict keys are region number, and the values are
-    keys for seeds with the team's name associated
+    :return: tourney_dict is a dictionary where each key is 64_bracket seed number, and each value is the team's name
     """
     df = pd.read_csv(match_path, index_col="Year")
     df = df.loc[year]
@@ -81,22 +92,23 @@ def match_teams_seeds(match_path, year):
     # All tournament teams are listed in Round 1
     df = df[df["Round"] == 1]
 
-    tourney_dict = defaultdict(str)
+    tourney_dict = {}
 
     # Iterate through every row of the Match_Data.csv dataframe
     for row in df.itertuples():
-        seed_dict = {}
+
         # row indexing - 1: Round, 2: Region Number, 3: Region Name, 4: Seed, 5: Score,
         # 6: Team, 7: Team.1, 8: Score.1, 9: Seed.1
 
-        # Add team1's seed as key, team name as value
-        seed_dict[row[4]] = row[6]
-        # Add team2's seed as key, team name as value
-        seed_dict[row[9]] = row[7]
+        # to get 64_bracket version of team seed, take original seed (row[4]) and add 16 * (region # - 1)
+        team1_seed = extrapolate_seed(row[4], row[2])
+        team2_seed = extrapolate_seed(row[9], row[2])
 
-        # Addresses KeyError by providing default value if the key doesn't exist already
-        tourney_dict[row[2]] = tourney_dict.get(row[2], seed_dict)
-        tourney_dict[row[2]].update(seed_dict)
+        team1_name = row[6]
+        team2_name = row[7]
+
+        tourney_dict[team1_seed] = team1_name
+        tourney_dict[team2_seed] = team2_name
 
     logging.debug("Tourney_dict is {}".format(tourney_dict))
     return tourney_dict
@@ -151,7 +163,6 @@ def generate_tournament(num_teams):
         result = tournament_round(teams, result)
     return flatten_list(result)
 
-
 def kenpom_df(filepath, year):
     """
     Returns pandas dataframe for one year of KenPom rankings
@@ -165,10 +176,10 @@ def kenpom_df(filepath, year):
 
 def actual_bracket(year, round):
     """
-
+    Returns actual winners for a given year and round
     :param year: year of tournament (int)
     :param round: round of tournament (int)
-    :return: winners for given year and round
+    :return: list of winners for given year and round
     """
     # Currently only have 2018 winner results
     # Dictionary of dictionaries, ordered by round number, then by region,
@@ -181,68 +192,71 @@ def actual_bracket(year, round):
                 3:
                     {1: [9, 11], 2: [9, 3], 3: [1, 3], 4: [1, 2]},
                 4:
-                    {1: [11], 2: [3], 3:[1], 4:[1]}}
+                    {1: [11], 2: [3], 3:[1], 4:[1]},
+                5:
+                    {1: [], 2: [3], 3: [1], 4: []},
+                6:
+                    {1: [], 2: [], 3: [1], 4: []}}
 
     choices = {2018: year_2018}
+
+    winners = []
+
     if not year in choices:
         raise ValueError("No data for given year")
     else:
-        return choices[year][round]
+        temp_b = choices[year][round]
+        # temp_b is a dict with each region's actual winners in it
+        for region in range(1, 5):
+
+            for seed in temp_b[region]:
+                winners.append(extrapolate_seed(seed, region))
+
+        return winners
 
 def score_per_round(round, pred_winner, actual_winner):
     # number of teams in each list is 8 divided by 2 to the power of round number minus 1. 8 teams in round 1, 4 teams in round 2, 2 teams in round 3
-    num_teams = int(8/(2**(round-1)))
+    # num_teams = int(32/(2**(round-1)))
     score = 0   # score holder
     per_win = 10 * (2 ** (round - 1)) # Round 1: 10pts, Round 2: 20pts, Round3: 40pts, etc
-    for region in range(1,5):
 
-        # walk through list of each region and tally the score
-        for index in range(num_teams):
-            # If the predicted winner is correct, add to the score total
-            if pred_winner[region][index] == actual_winner[region][index]:
-                score += per_win
+    # Iterate through each team in the predicted winner list, and if that seed number is in actual winners, add to score
+    for team in pred_winner:
+        if team in actual_winner:
+            score += per_win
 
     return score
 
-def predict_winners(regions, tourney_dict):
+def predict_winners(bracket, tourney_dict, model):
     """
-    :param regions: list of lists, where each element of interior list is seeds still in competition, and the list itself represents a region
+    :param bracket: Bracket of teams to put through ML model
     :return: The winners predicted by the machine learning algorithm
     """
-
-    model = training.Lin_Sig(12)
-    model = test_model.load_model(".\\Models\\5000_epochs", model)
-
     # This will hold winners of each match for a particular region
-    winners = {1: [], 2: [], 3: [], 4: []}  # Dict of lists for each region's winner
+    winners = []
 
     index = 0
-    while index < len(regions[0]):
+    # go through bracket of teams
+    while index < len(bracket):
+        logging.debug("Index is {}".format(index))
+        stats = get_matchup_data(tourney_dict[bracket[index]], tourney_dict[bracket[index + 1]], kp_df)
 
-        # iterate through the four regions.
-        # reg_num + 1 gives value of region, used to access tourney_dict for that region
-        for reg_num, region in enumerate(regions):
+        stats = Variable(stats)
+        winner = model(stats)
 
-            # AS LONG AS I PASS get_matchup_data the two team names, the seeds should be unimportant
-            # return stats for matchup against two teams (index team and index+1
-            stats = get_matchup_data(tourney_dict[reg_num + 1][region[index]],
-                                     tourney_dict[reg_num + 1][region[index + 1]], kp_df)
-            stats = Variable(stats)
-            winner = model(stats)
+        # if winner is close to 1, team 2 is winner
+        if winner > 0.5:
+            winners.append(bracket[index + 1])
 
-            # if winner is close to 1, team 2 is winner
-            if winner > 0.6:
-                winners[reg_num + 1].append(region[index + 1])
+        # if winner is close to zero, team 1 is winner
+        elif winner < 0.5:
+            winners.append(bracket[index])
 
-            # if winner is close to zero, team 1 is winner
-            elif winner < 0.4:
-                winners[reg_num + 1].append(region[index])
-
-            else:
-                print("NO CLEAR WINNER, CHECK MODEL HERE")
-                print("Teams: {} vs {}".format(tourney_dict[reg_num + 1][region[index]],
-                                               tourney_dict[reg_num + 1][region[index + 1]]))
-                print("Predicted value is {}".format(winner))
+        else:
+            print("NO CLEAR WINNER, CHECK MODEL HERE")
+            print("Teams: {} vs {}".format(tourney_dict[bracket[index]],
+                                           tourney_dict[bracket[index + 1]]))
+            print("Predicted value is {}".format(winner))
 
         index += 2
 
@@ -273,9 +287,13 @@ if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG)
     year = 2018
 
+    model = training.Lin_Sig(12)
+    model = test_model.load_model(".\\Models\\5000_epochs", model)
+    # model = test_model.load_model(".\\Models\\5_epochs", model)
+
     kp_df = kenpom_df(".\\Training_Data\\KenPom_Complete.csv", year)
 
-    # Divide into four 16-team regions
+    # Can't simply build 64 team bracket, need four sections of 16 team brackets that play against each other
     region1 = generate_tournament(16)
 
     regions = [region1]*4
@@ -285,29 +303,29 @@ if __name__ == '__main__':
     # tourney_dict functions as match data, while maintaining easily accessible team information based on region and seed
     tourney_dict = match_teams_seeds(".\\Training_Data\\Match_Data.csv", year)
 
+
     total_score = 0
-    for round in range(1,5):
-        # Get dictionary of predicted winners for the round
-        pred_win = predict_winners(regions, tourney_dict)
-        print("Predicted winners: {}".format(pred_win))
+
+    for round in range(1,7):
+        # Get list of predicted winners for each round
+        pred_win = predict_winners(bracket_64, tourney_dict, model)
+        logging.debug("Predicted winners: {}".format(pred_win))
 
         real_win = actual_bracket(year, round)
-        print("Real winners are: {}".format(real_win))
+        logging.debug("Real Bracket Winners are {}".format(real_win))
+
+        if len(pred_win) == 1:
+            logging.info("Predicted winning team is {}\nReal winning team is {}".
+                         format(tourney_dict[pred_win[0]],tourney_dict[real_win[0]]))
         # Add this round's score to the total score
         rnd_score = score_per_round(round, pred_win, real_win)
         total_score += rnd_score
-        print("Round {} score is {}".format(round, rnd_score))
+        logging.debug("Round {} score is {}".format(round, rnd_score))
 
-        for index in range(4):
-            regions[index] = pred_win[index+1]
+        bracket_64 = pred_win
 
-    # Todo: Add functionality for final four and championship rounds where teams play against other regions
+    logging.info("Final score is: {}".format(total_score))
 
-    print("Final score is: {}".format(total_score))
-
-
-# TODO: Attempt to rewrite much of this as a 64 team bracket so there are no issues with the final
-# Generate the 64 teams from the 4 16 team lists
 
 
 

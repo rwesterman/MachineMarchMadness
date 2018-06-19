@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # test_sig(r"./Training_Data/Training_Set.csv", 2000)
 
     # Use this to ask user for number of epochs to run
-    # epoch_input()
+    epoch_input()
 
-    test_model.run_validation(".\\Models\\5000_epochs")
+    # test_model.run_validation(".\\Models\\5000_epochs")
 
