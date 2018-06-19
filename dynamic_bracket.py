@@ -174,45 +174,137 @@ def kenpom_df(filepath, year):
     df = df[df["Year"] == year]
     return df
 
-def actual_bracket(year, round):
+def seed_from_tourneydict(tourney_dict, seed, team_name):
     """
-    Returns actual winners for a given year and round
+    Compare team name against tourney_dict to get region-adjusted seed
+    :param tourney_dict: Dictionary of key:value pairs in form seed:team_name
+    :param starting_seed: Seed not yet adjusted for region
+    :param team_name: Name of team to search for
+    :return:
+    """
+    # Since regions don't apply to championship, need to find region adjusted seed of winner,
+    # do this by adding 16 to original seed until the value in tourney_dict matches the team name
+    iterate_seed = seed
+    while iterate_seed <= 64:
+        if tourney_dict[iterate_seed] == team_name:
+            seed = iterate_seed
+        iterate_seed += 16
+    return seed
+
+
+def actual_bracket(year, round, tourney_dict):
+    """
+    Dynmically pulls actual winners for a given year and round from match_data.csv
     :param year: year of tournament (int)
     :param round: round of tournament (int)
+    :param tourney_dict: Dictionary of seed: team_name, used here to check correct seed for teams in rounds 5 and 6
     :return: list of winners for given year and round
     """
-    # Currently only have 2018 winner results
-    # Dictionary of dictionaries, ordered by round number, then by region,
-    # eg. year_2018[1][1] is winners from region 1 in round 1 of year 2018
-    year_2018 ={1:
-                    {1: [16, 9, 13, 5, 2, 7, 3, 11], 2: [1, 9, 4, 5, 2, 7, 3, 6],
-                    3:[1, 9, 13, 5, 2, 10, 3, 6], 4:[1, 8, 4, 5, 2, 7, 3, 11]},
-                2:
-                    {1: [9, 5, 7, 11], 2: [9, 4, 7, 3], 3: [1, 5, 2, 3], 4: [1, 5, 2, 11]},
-                3:
-                    {1: [9, 11], 2: [9, 3], 3: [1, 3], 4: [1, 2]},
-                4:
-                    {1: [11], 2: [3], 3:[1], 4:[1]},
-                5:
-                    {1: [], 2: [3], 3: [1], 4: []},
-                6:
-                    {1: [], 2: [], 3: [1], 4: []}}
-
-    choices = {2018: year_2018}
 
     winners = []
 
-    if not year in choices:
-        raise ValueError("No data for given year")
+    # region numbers are kept consistent with those shown in match_data.csv, which means they
+    # change between years. Make sure these are kept consistent across data.
+
+    # Order is unimportant in these matchups because the scoring comparison simply checks if a value is in the list
+
+    df = pd.read_csv(".\\Training_Data\\Match_Data.csv", index_col = "Year")
+    # limit df to requested year
+    df = df.loc[year]
+    # further limit df to requested round + 1 (Plus one so we can infer the winners of the requested round)
+
+    if round < 5:
+        df = df[df["Round"] == round + 1]
+        logging.debug(df.head())
+
+        # add the seed of each team in the round following the requested round, because it means they won the requested round
+        for row in df.itertuples():
+            # extrapolate the region based seed from seed number and region number, add to winners list
+            winners.append(seed_from_tourneydict(tourney_dict, row[4], row[6]))
+            winners.append(seed_from_tourneydict(tourney_dict, row[9], row[7]))
+            # winners.append(extrapolate_seed(row[4], row[2]))
+            # winners.append(extrapolate_seed(row[9], row[2]))
+
+    elif round == 5:
+        # This is the Final Four round, so seeds can't be extrapolated from region numbers
+        # Therefore have to do it by checking against tourney_dict
+        df = df[df["Round"] == 6]
+        # Go through each team the final four, get their seed number from tourney_dict, add to winners list
+        team1_seed = df.iloc[0]["Seed"]
+        team1_name = df.iloc[0]["Team"]
+        team2_name = df.iloc[0]["Team.1"]
+        team2_seed = df.iloc[0]["Seed.1"]
+
+        team1_seed = seed_from_tourneydict(tourney_dict, team1_seed, team1_name)
+        team2_seed = seed_from_tourneydict(tourney_dict, team2_seed, team2_name)
+
+        winners.append(team1_seed)
+        winners.append(team2_seed)
+
+
+    # If looking for results of the final round, need to compare scores, then backtrack correct seed number
     else:
-        temp_b = choices[year][round]
-        # temp_b is a dict with each region's actual winners in it
-        for region in range(1, 5):
+        df = df[df["Round"] == 6]
+        # Compare scores in final game to determine winner
+        if df.iloc[0]["Score"] > df.iloc[0]["Score.1"]:
+            win_team_name = df.iloc[0]["Team"]
+            win_team_seed = df.iloc[0]["Seed"]
+        else:
+            win_team_name = df.iloc[0]["Team.1"]
+            win_team_seed = df.iloc[0]["Seed.1"]
 
-            for seed in temp_b[region]:
-                winners.append(extrapolate_seed(seed, region))
+        # Since regions don't apply to championship, need to find region adjusted seed of winner,
+        # do this by adding 16 to original seed until the value in tourney_dict matches the team name
+        win_team_seed = seed_from_tourneydict(tourney_dict, win_team_seed, win_team_name)
+        winners.append(win_team_seed)
 
-        return winners
+
+    #
+    #
+    #
+    #
+    # year_2018 ={1:
+    #                 {1: [16, 9, 13, 5, 2, 7, 3, 11], 2: [1, 9, 4, 5, 2, 7, 3, 6],
+    #                 3:[1, 9, 13, 5, 2, 10, 3, 6], 4:[1, 8, 4, 5, 2, 7, 3, 11]},
+    #             2:
+    #                 {1: [9, 5, 7, 11], 2: [9, 4, 7, 3], 3: [1, 5, 2, 3], 4: [1, 5, 2, 11]},
+    #             3:
+    #                 {1: [9, 11], 2: [9, 3], 3: [1, 3], 4: [1, 2]},
+    #             4:
+    #                 {1: [11], 2: [3], 3:[1], 4:[1]},
+    #             5:
+    #                 {1: [], 2: [3], 3: [1], 4: []},
+    #             6:
+    #                 {1: [], 2: [], 3: [1], 4: []}}
+    #
+    # year_2017 = {1:
+    #                 {1: [1, 8, 4, 5, 2, 7, 3, 11], 2: [1, 8, 4, 5, 2, 7, 3, 11],
+    #                 3:[1, 9, 4, 5, 2, 7, 3, 11], 4:[1, 8, 4, 5, 2, 7, 3, 11]},
+    #             2:
+    #                 {1: [8, 4, 7, 3], 2: [1, 4, 2, 11], 3: [1, 5, 2, 3], 4: [1, 5, 2, 11]},
+    #             3:
+    #                 {1: [4, 7], 2: [1, 11], 3: [1, 3], 4: [1, 2]},
+    #             4:
+    #                 {1: [7], 2: [1], 3:[1], 4:[1]},
+    #             5:
+    #                 {1: [], 2: [3], 3: [1], 4: []},
+    #             6:
+    #                 {1: [], 2: [], 3: [1], 4: []}}
+    #
+    #
+    # choices = {2018: year_2018, 2017: year_2017}
+    #
+    # if not year in choices:
+    #     raise ValueError("No data for given year")
+    # else:
+    #     temp_b = choices[year][round]
+    #     # temp_b is a dict with each region's actual winners in it
+    #     for region in range(1, 5):
+    #
+    #         for seed in temp_b[region]:
+    #             winners.append(extrapolate_seed(seed, region))
+
+    return winners
 
 def score_per_round(round, pred_winner, actual_winner):
     # number of teams in each list is 8 divided by 2 to the power of round number minus 1. 8 teams in round 1, 4 teams in round 2, 2 teams in round 3
@@ -303,7 +395,6 @@ if __name__ == '__main__':
     # tourney_dict functions as match data, while maintaining easily accessible team information based on region and seed
     tourney_dict = match_teams_seeds(".\\Training_Data\\Match_Data.csv", year)
 
-
     total_score = 0
 
     for round in range(1,7):
@@ -311,7 +402,7 @@ if __name__ == '__main__':
         pred_win = predict_winners(bracket_64, tourney_dict, model)
         logging.debug("Predicted winners: {}".format(pred_win))
 
-        real_win = actual_bracket(year, round)
+        real_win = actual_bracket(year, round, tourney_dict)
         logging.debug("Real Bracket Winners are {}".format(real_win))
 
         if len(pred_win) == 1:
@@ -325,7 +416,4 @@ if __name__ == '__main__':
         bracket_64 = pred_win
 
     logging.info("Final score is: {}".format(total_score))
-
-
-
 
