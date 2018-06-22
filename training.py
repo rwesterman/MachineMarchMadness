@@ -1,6 +1,7 @@
 import torch
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+import logging
 
 from dataload import Match_Winners
 
@@ -64,8 +65,8 @@ def linsig_train(training_loader, num_inputs, num_epochs):
             loss = criterion(y_pred, labels)
 
             # Print loss for every 10th batch
-            # if i % 10 == 0 and epoch % 5 == 0:
-            print("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+            if i % 8 == 0 and epoch % 2 == 0:
+                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
 
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()

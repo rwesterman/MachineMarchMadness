@@ -24,6 +24,20 @@ def get_year_data(year, df):
     year_data = df[df["Year"] == year]
     return year_data
 
+def get_combined_match_df(df1, df2, match_df):
+    """
+    Make sure df2 drops any conflicting columns that may cause issues
+    :param df1: 
+    :param df2: 
+    :param year: 
+    :return: combined dataframe
+    """
+
+    # Todo: Figure out how to simplify combination dataframe and pass it everywhere
+
+    df1 = df1[(df1["Team"] == match_df["Team"]) | (df1["Team"] == match_df["Team.1"])]
+    df1 = df2[(df2["Team"] == match_df["Team"]) | (df2["Team"] == match_df["Team.1"])]
+
 def associate_data(match_data, kenpom_df, bpi_df):
     """
     Takes one match at a time and associates KenPom data with each team. Returns dictionary of associated
@@ -40,9 +54,7 @@ def associate_data(match_data, kenpom_df, bpi_df):
                   "Score2": match_data["Score.1"],
                   "Year": match_data["Year"]}
 
-    logging.debug(f"Team1 is {score_dict['Team1']}, Team2 is {score_dict['Team2']}")
-
-
+    logging.debug(f"Team1 is {score_dict['Team1']}, Team2 is {match_data['Team2']}")
 
     # Reduce all dataframes to two teams from given year
     kp_df = kenpom_df.loc[kenpom_df["Year"] == score_dict["Year"]]
@@ -52,8 +64,8 @@ def associate_data(match_data, kenpom_df, bpi_df):
     bpi_df = bpi_df.drop(["W-L", "Rk", "Conf"], axis = 1)
 
     # Get the kenpom data for each of the teams in the given year (teams is two row dataframe)
-    teams = kp_df[(kp_df["Team"] == score_dict["Team1"]) | (kp_df["Team"] == score_dict["Team2"])]
-    teams2 = bpi_df[(bpi_df["Team"] == score_dict["Team1"]) | (bpi_df["Team"] == score_dict["Team2"])]
+    teams = kp_df[(kp_df["Team"] == match_data["Team"]) | (kp_df["Team"] == match_data["Team.1"])]
+    teams2 = bpi_df[(bpi_df["Team"] == match_data["Team"]) | (bpi_df["Team"] == match_data["Team.1"])]
 
     # Want to randomize the team so the efficiency isn't always higher for team 1
     teamnum = randint(1,2)

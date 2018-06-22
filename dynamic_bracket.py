@@ -257,53 +257,6 @@ def actual_bracket(year, round, tourney_dict):
         # do this by adding 16 to original seed until the value in tourney_dict matches the team name
         win_team_seed = seed_from_tourneydict(tourney_dict, win_team_seed, win_team_name)
         winners.append(win_team_seed)
-
-
-    #
-    #
-    #
-    #
-    # year_2018 ={1:
-    #                 {1: [16, 9, 13, 5, 2, 7, 3, 11], 2: [1, 9, 4, 5, 2, 7, 3, 6],
-    #                 3:[1, 9, 13, 5, 2, 10, 3, 6], 4:[1, 8, 4, 5, 2, 7, 3, 11]},
-    #             2:
-    #                 {1: [9, 5, 7, 11], 2: [9, 4, 7, 3], 3: [1, 5, 2, 3], 4: [1, 5, 2, 11]},
-    #             3:
-    #                 {1: [9, 11], 2: [9, 3], 3: [1, 3], 4: [1, 2]},
-    #             4:
-    #                 {1: [11], 2: [3], 3:[1], 4:[1]},
-    #             5:
-    #                 {1: [], 2: [3], 3: [1], 4: []},
-    #             6:
-    #                 {1: [], 2: [], 3: [1], 4: []}}
-    #
-    # year_2017 = {1:
-    #                 {1: [1, 8, 4, 5, 2, 7, 3, 11], 2: [1, 8, 4, 5, 2, 7, 3, 11],
-    #                 3:[1, 9, 4, 5, 2, 7, 3, 11], 4:[1, 8, 4, 5, 2, 7, 3, 11]},
-    #             2:
-    #                 {1: [8, 4, 7, 3], 2: [1, 4, 2, 11], 3: [1, 5, 2, 3], 4: [1, 5, 2, 11]},
-    #             3:
-    #                 {1: [4, 7], 2: [1, 11], 3: [1, 3], 4: [1, 2]},
-    #             4:
-    #                 {1: [7], 2: [1], 3:[1], 4:[1]},
-    #             5:
-    #                 {1: [], 2: [3], 3: [1], 4: []},
-    #             6:
-    #                 {1: [], 2: [], 3: [1], 4: []}}
-    #
-    #
-    # choices = {2018: year_2018, 2017: year_2017}
-    #
-    # if not year in choices:
-    #     raise ValueError("No data for given year")
-    # else:
-    #     temp_b = choices[year][round]
-    #     # temp_b is a dict with each region's actual winners in it
-    #     for region in range(1, 5):
-    #
-    #         for seed in temp_b[region]:
-    #             winners.append(extrapolate_seed(seed, region))
-
     return winners
 
 def score_per_round(round, pred_winner, actual_winner):

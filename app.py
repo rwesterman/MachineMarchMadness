@@ -4,11 +4,12 @@ from dataload import Match_Winners
 from training import linsig_train
 
 import test_model
+import logging
 
 def test_sig(filepath, num_epochs, test_diff = False):
     dataset = Match_Winners(r"./Training_Data/Training_Set.csv", test_diff)
     num_inputs = dataset.x_data.shape[1]
-    training_loader = DataLoader(dataset, batch_size=100, shuffle=True, num_workers = 2)
+    training_loader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers = 4)
     linsig_train(training_loader, num_inputs, num_epochs)
 
 def epoch_input():
@@ -26,6 +27,9 @@ def epoch_input():
         test_sig(r"./Training_Data/Training_Set.csv", 100)
 
 if __name__ == '__main__':
+    # Setup output to log file and to stdout
+    logging.basicConfig(filename = ".\\Models\\LossLog.txt", level = logging.INFO)
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     # Load in the match data
     # Setting test_diff to true means we're only looking at one input, "Eff_Diff"
