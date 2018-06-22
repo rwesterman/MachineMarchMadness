@@ -2,37 +2,38 @@ import pandas as pd
 import re
 from pprint import pprint
 
-def standardize_teams(match_df, kp_df):
+def standardize_teams(match_df, df2, first_year):
     """
     Alters team names in Match_Data.csv to correspond to KenPom team names
     :param match_df: dataframe from Match_Data.csv
-    :param kp_df: dataframe from KenPom_Complete.csv
+    :param df2: dataframe from KenPom_Complete.csv
+    :param first_year: First year of data for df2
     :return: match_updated dataframe
     """
+
+    match_df = match_df[match_df["Year"] >= first_year]
+
     # team1 and team2 are Series, respectively columns Team and Team.1
     team1 = match_df.loc[:,"Team"]
     team2 = match_df.loc[:,"Team.1"]
 
-    kp_team = kp_df.loc[:,"Team"]
+    # Get "Team" column from kenpom dataframe
+    df2_team = df2.loc[:, "Team"]
 
     # Change all teams that end with St to St. in Match Data
-    team1 = team1.apply(normalize_state)
-    team2 = team2.apply(normalize_state)
+    df2_team = df2_team.apply(normalize_state)
 
-    find_differences(team1, team2, kp_team)
+    find_differences(team1, team2, df2_team)
 
-    team1 = team1.apply(change_outliers)
-    team2 = team2.apply(change_outliers)
+    df2_team = df2_team.apply(change_outliers)
 
-    match_df["Team"] = team1
-    match_df["Team.1"] = team2
+    df2["Team"] = df2_team
 
-    team1 = match_df.loc[:,"Team"]
-    team2 = match_df.loc[:,"Team.1"]
+    find_differences(team1, team2, df2_team)
 
-    find_differences(team1, team2, kp_team)
+    return df2
 
-    match_df.to_csv("Training_Data\\Match_Data.csv", index = False)
+    # match_df.to_csv("Training_Data\\Match_Data.csv", index = False)
 
 
 def normalize_state(team):
@@ -41,6 +42,7 @@ def normalize_state(team):
     :param team: name of team, run regex to check for certain attributes
     :return: modified or unmodified name of team
     """
+    # $ symbol means that it only looks at the end of the string
     return re.sub(r'St$', 'St.', team)
 
 def change_outliers(team):
@@ -70,7 +72,25 @@ def change_outliers(team):
                 "Ole Miss": "Mississippi",
                 "Wisconsin Milwaukee":"Milwaukee",
                 "Middle Tennessee St.":"Middle Tennessee",
-                "Wisconsin Green Bay": "Green Bay"
+                "Wisconsin Green Bay": "Green Bay",
+                "UT-Arlington": "UT Arlington",
+                "UT San Antonio": "UTSA",
+                "Loyola (MD)": "Loyola MD",
+                "Loyola (Chi)": "Loyola Chicago",
+                "Mt. St. Mary's" : "Mount St. Mary's",
+                "N Colorado" : "Northern Colorado",
+                "Ohio State" : "Ohio St.",
+                "Charleston" : "College of Charleston",
+                "CSU Northridge": "Cal St. Northridge",
+                "UConn": "Connecticut",
+                "CSU Fullerton": "Cal St. Fullerton",
+                "CSU Bakersfield": "Cal St. Bakersfield",
+                "Boston Univ." : "Boston University",
+                "Miss Valley St.": "Mississippi Valley St.",
+                "Arkansas-Pine Bluff": "Arkansas Pine Bluff",
+                "Arkansas-Little Rock": "Arkansas Little Rock",
+                "Detroit Mercy" : "Detroit",
+                "Hawai'i": "Hawaii",
                 }
 
     # If parameter team is an outlier, return the replacement function
@@ -79,23 +99,23 @@ def change_outliers(team):
     else:
         return team
 
-def find_differences(m_team1, m_team2, kp_team):
+def find_differences(m_team1, m_team2, df2_team):
     """
-
+    Standardizing to match_data.csv, so finding all differences between teams in tournament and teams in other datasets
     :param m_team1: match_data team1 name Series
     :param m_team2: match_data team2 name Series
-    :param kp_team: kenpom team name Series
+    :param df2_team: kenpom team name Series
     :return:
     """
     match_set = set()
-    kp_set = set()
+    df2_set = set()
 
     match_set = match_set.union(set(m_team1.tolist()))
     match_set = match_set.union(set(m_team2.tolist()))
 
-    kp_set = kp_set.union(set(kp_team.tolist()))
+    df2_set = df2_set.union(set(df2_team.tolist()))
     # #
-    outliers = kp_set - match_set
+    outliers = match_set - df2_set
     #
     pprint(outliers)
     return outliers

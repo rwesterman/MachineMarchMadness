@@ -47,7 +47,8 @@ def add_year_col(year, df):
 
     return df
 
-def get_kenpom_complete():
+
+def set_kenpom_complete():
     kenpom_complete = pd.DataFrame()
     df_dict = get_xl_data()
 
@@ -67,10 +68,9 @@ def get_kenpom_complete():
 
 
 if __name__ == '__main__':
-    # TODO: go through base dataset for Kenpom and replace St. with St
 
     # Ignore warning about using .loc to replace values in dataframe
     pd.options.mode.chained_assignment = None  # default='warn'
 
     # Get kenpom complete dataframe
-    kp_comp = get_kenpom_complete()
+    kp_comp = set_kenpom_complete()

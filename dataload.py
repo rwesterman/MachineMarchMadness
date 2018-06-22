@@ -54,7 +54,7 @@ class Match_Winners(Dataset):
             self.x_np = np.asarray(self.df.iloc[1:, [-3]],dtype = np.float32)
         else:
             # x_data is all rows after row 1, columns 2 through 4 non-inclusive
-            self.x_np = np.asarray(self.df.iloc[1:, 2:14], dtype=np.float32)
+            self.x_np = np.asarray(self.df.iloc[1:, 2:20], dtype=np.float32)
         # y_data is all rows after row 1, only the second to last column (Winner)
         self.y_np = np.asarray(self.df.iloc[1:,[-1]], dtype = np.float32)
 
