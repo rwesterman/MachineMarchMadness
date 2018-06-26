@@ -7,18 +7,24 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.firefox.options import Options
 
 class EloWalker():
 
     def __init__(self, start_url):
-        self.driver = webdriver.Firefox(executable_path= "geckodriver.exe")
         self.count_pages = 0
         self.start_url = start_url
+
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level = logging.INFO)
-        self.wait = WebDriverWait(self.driver, 10)
 
+        self.options = Options()
+        self.options.add_argument("--headless")
+
+        self.driver = webdriver.Firefox(firefox_options = self.options, executable_path= "geckodriver.exe")
         self.driver.get(self.start_url)
+
+        self.wait = WebDriverWait(self.driver, 10)
 
     def get_next_page(self):
         """Find out if there is a next page link"""
@@ -66,6 +72,22 @@ class EloWalker():
         with open("Elo_Data_Winners.csv", 'a') as f:
             f.write(data)
 
+    def set_new_url(url):
+        self.driver.get(url)
+
+def run_scraper(walkerobj):
+    next_page = walkerobj.get_next_page()
+
+    while next_page:
+        # gather the csv data from the page and write it to .csv file
+        walkerobj.get_csv_data()
+        # click on the next page
+        walkerobj.click_next_page(next_page)
+
+        next_page = walkerobj.get_next_page()
+
+    return walkerobj.driver.current_url
+
 if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
@@ -73,18 +95,18 @@ if __name__ == '__main__':
     # This link is all games from 2002-2018 listed with the winner first. This should be the most complete dataset possible,
     # but COULD CAUSE ISSUES IF THIS DATA IS USED FOR TRAINING A NEURAL NETWORK.
     # I only intend to determine Elo rankings based on this data so win/lose order shouldn't matter.
-    crawl = EloWalker('http://cbbref.com/tiny/AdoIJ')
-    next_page = crawl.get_next_page()
+    # crawl = EloWalker('http://cbbref.com/tiny/AdoIJ')
+    crawl = EloWalker('http://cbbref.com/tiny/sDDeQ')
 
-    # While there is a next page available...
-    while next_page:
-        # gather the csv data from the page and write it to .csv file
-        crawl.get_csv_data()
-        # click on the next page
-        crawl.click_next_page(next_page)
+    # allow 5 attempts to reconnect with the final url and keep adding data
+    # this is useful if a timeout occurs before actually reaching the end of the data
+    num_fails = 0
+    while num_fails < 5:
+        end_url = run_scraper(crawl)
+        crawl.driver.close()
 
-        next_page = crawl.get_next_page()
-
-    print(crawl.driver.current_url)
+        # apparently this is two positional arguments?
+        crawl.set_new_url(end_url)
+        num_fails += 1
 
     crawl.driver.close()
