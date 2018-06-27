@@ -5,6 +5,7 @@ All of the classes for EloPy. The users should only interact with the Implementa
 
 This code is borrowed from github.com/HankMD
 """
+import logging
 
 
 class Implementation:
@@ -19,6 +20,21 @@ class Implementation:
         """
         self.base_rating = base_rating
         self.players = []
+        self.logger = logging.getLogger(__name__)
+
+
+    def log(self, level, message):
+        if level.lower() == "debug":
+            self.logger.debug(message)
+
+        if level.lower() == "info":
+            self.logger.info(message)
+
+        if level.lower() == "warning":
+            self.logger.warning(message)
+
+        if level.lower() == "error":
+            self.logger.error(message)
 
     def __getPlayerList(self):
         """

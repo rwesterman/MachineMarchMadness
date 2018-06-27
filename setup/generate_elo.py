@@ -12,7 +12,7 @@ import logging
 class DataElo():
     def __init__(self, year):
         self.year = year
-        self.filepath = "..\\Training_Data\\Raw\\Elo_Data.csv"
+        self.filepath = "..\\Training_Data\\Raw\\Elo_Data_Winners.csv"
         self.columns = ["Year", "Schl", "Opp", "Outcome"]
 
     def get_df(self):
@@ -23,15 +23,13 @@ class DataElo():
 
 
 def write_elo_csv(ranking_list):
-    with open("elo_rankings.csv", 'a') as f:
+    with open("..\\Training_Data\elo_rankings.csv", 'a') as f:
         for year, team, rank in ranking_list:
             f.write("{},{},{}\n".format(year, team, rank))
 
 
-
 if __name__ == '__main__':
-    logging.basicConfig(level = logging.INFO)
-
+    logging.basicConfig(level = logging.DEBUG)
     year = 2018
     data_elo = DataElo(year)
     df = data_elo.get_df()
@@ -69,8 +67,8 @@ if __name__ == '__main__':
         team_rank = (year, team, game.getPlayerRating(team))
         team_list.append(team_rank)
 
-    for player in game.players:
-        logging.debug("{} has played {} games".format(player.name, player.games_played))
+    # for player in game.players:
+        # game.log("info", "{} has played {} games".format(player.name, player.games_played))
 
     write_elo_csv(team_list)
 
