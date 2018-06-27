@@ -129,17 +129,16 @@ def tournament_round(num_teams, matchlist):
         # second pass this for loop gives team_or_match type == list
         if type(team_or_match) == type([]):
             new_matches += [tournament_round(num_teams, team_or_match)]
-        # Only excecuted on first pass??
         else:
             new_matches += [[team_or_match, num_teams + 1 - team_or_match]]
     return new_matches
 
-def flatten_list( matches ):
+def flatten_list(matches):
     """Takes a list of lists, log2(num_teams)+1 lists deep, then flattens them recursively to single level"""
     teamlist = []
     for team_or_match in matches:
         if type(team_or_match) == type([]):
-            teamlist += flatten_list( team_or_match )
+            teamlist += flatten_list(team_or_match)
         else:
             teamlist += [team_or_match]
     return teamlist
@@ -152,7 +151,7 @@ def generate_tournament(num_teams):
 
     # Catch exceptions if log2(num_teams) is not an integer
     if num_rounds != math.trunc( num_rounds ):
-        raise ValueError( "Number of teams must be a power of 2" )
+        raise ValueError("Number of teams must be a power of 2")
 
     # Initialize teams and result
     # teams will act as input to track

@@ -21,6 +21,7 @@ def standardize_teams(match_df, df2, first_year):
     df2_team = df2.loc[:, "Team"]
 
     # Change all teams that end with St to St. in Match Data
+    df2_team = df2_team.apply(normalize_st)
     df2_team = df2_team.apply(normalize_state)
 
     find_differences(team1, team2, df2_team)
@@ -36,7 +37,7 @@ def standardize_teams(match_df, df2, first_year):
     # match_df.to_csv("Training_Data\\Match_Data.csv", index = False)
 
 
-def normalize_state(team):
+def normalize_st(team):
     """
     normalizes team names between Match_Data.csv and KenPom_Complete.csv
     :param team: name of team, run regex to check for certain attributes
@@ -44,6 +45,9 @@ def normalize_state(team):
     """
     # $ symbol means that it only looks at the end of the string
     return re.sub(r'St$', 'St.', team)
+
+def normalize_state(team):
+    return re.sub(r'State', 'St.', team)
 
 def change_outliers(team):
     outliers = {"Miami": "Miami FL",
@@ -91,6 +95,36 @@ def change_outliers(team):
                 "Arkansas-Little Rock": "Arkansas Little Rock",
                 "Detroit Mercy" : "Detroit",
                 "Hawai'i": "Hawaii",
+                "Brigham Young": "BYU",
+                "UC-Irvine": "UC Irvine",
+                "UC-Davis": "UC Davis",
+                "UC-Santa Barbara": "UC Santa Barbara",
+                "Texas Christian": "TCU",
+                "Alabama-Birmingham": "UAB",
+                "Maryland-Baltimore County": "UMBC",
+                "North Carolina-Asheville": "UNC Asheville",
+                "North Carolina-Greensboro": "UNC Greensboro",
+                "North Carolina-Wilmington": "UNC Wilmington",
+                "Albany (NY)": "Albany",
+                "Little Rock": "Arkansas Little Rock",
+                "University of California": "California",
+                "Louisiana State": "LSU",
+                "Louisiana St.": "LSU",
+                "Long Island University": "LIU Brooklyn",
+                "Loyola (IL)": "Loyola Chicago",
+                "Miami (FL)": "Miami FL",
+                "Miami (OH)": "Miami OH",
+                "Southern Methodist": "SMU",
+                "St. John's (NY)": "St. John's",
+                "Saint Mary's (CA)": "Saint Mary's",
+                "Texas A&M-Corpus Christi": "Texas A&M Corpus Chris",
+                "Nevada-Las Vegas": "UNLV",
+                "Southern California": "USC",
+                "Texas-Arlington": "UT Arlington",
+                "Texas-El Paso": "UTEP",
+                "Texas-San Antonio": "UTSA",
+                "Virginia Commonwealth": "VCU",
+                "Illinois-Chicago": "Illinois Chicago"
                 }
 
     # If parameter team is an outlier, return the replacement function

@@ -28,12 +28,11 @@ def write_elo_csv(ranking_list):
             f.write("{},{},{}\n".format(year, team, rank))
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level = logging.DEBUG)
-    year = 2018
+def determine_elo_ranks(year):
     data_elo = DataElo(year)
     df = data_elo.get_df()
 
+    # Need to make a new Implementation object for each year
     game = Implementation()
 
     allPlayers = set()
@@ -71,6 +70,15 @@ if __name__ == '__main__':
         # game.log("info", "{} has played {} games".format(player.name, player.games_played))
 
     write_elo_csv(team_list)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level = logging.DEBUG)
+
+    # iterate through years 2003-2018
+    for year in range(2003, 2019):
+        determine_elo_ranks(year)
+
 
 
 
