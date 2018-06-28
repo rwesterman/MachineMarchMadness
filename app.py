@@ -28,14 +28,8 @@ def epoch_input():
 
 if __name__ == '__main__':
     # Setup output to log file and to stdout
-    logging.basicConfig(filename = ".\\Models\\LossLog.txt", level = logging.INFO)
+    logging.basicConfig(filename = ".\\Models\\LossLog_with_elo.txt", level = logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler())
-
-    # Load in the match data
-    # Setting test_diff to true means we're only looking at one input, "Eff_Diff"
-    # test_sig(r"./Training_Data/Training_Set.csv", 5)
-    # test_sig(r"./Training_Data/Training_Set.csv", 100)
-    # test_sig(r"./Training_Data/Training_Set.csv", 2000)
 
     # Use this to ask user for number of epochs to run
     epoch_input()
