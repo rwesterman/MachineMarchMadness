@@ -5,8 +5,31 @@ import logging
 
 from dataload import Match_Winners
 
-
 class Lin_Sig(torch.nn.Module):
+
+    def __init__(self, num_inputs):
+        super().__init__()
+
+        # Making three-deep neural network with 12 inputs
+        # 12 inputs in x_data. Arbitrary output 8
+        self.lin1 = torch.nn.Linear(num_inputs, 200)
+        self.lin2 = torch.nn.Linear(200, 100)
+        self.lin3 = torch.nn.Linear(100, 60)
+        self.lin4 = torch.nn.Linear(60, 1)
+
+        self.sigmoid = torch.nn.Sigmoid()
+
+    def forward(self, x):
+        x.view()
+        out1 = self.sigmoid(self.lin1(x))
+        out2 = self.sigmoid(self.lin2(out1))
+        out3 = self.sigmoid(self.lin3(out2))
+        y_pred = self.sigmoid(self.lin4(out3))
+
+        return y_pred
+
+
+class Lin_Relu(torch.nn.Module):
 
     def __init__(self, num_inputs):
         super().__init__()
@@ -38,8 +61,8 @@ class Lin_Sig(torch.nn.Module):
         return y_pred
 
 
-def linsig_train(training_loader, num_inputs, num_epochs):
-    model = Lin_Sig(num_inputs)
+def linrelu_train(training_loader, num_inputs, num_epochs):
+    model = Lin_Relu(num_inputs)
 
     # Testing different Loss functions
     criterion = torch.nn.MSELoss(size_average=True)
@@ -81,6 +104,49 @@ def linsig_train(training_loader, num_inputs, num_epochs):
     #     f.write("{} inputs, {} Epochs, {} Accuracy\n".format(num_inputs, num_epochs, accuracy))
 
 
-    save_path = ".\\Models\\{}_epochs".format(num_epochs)
+    save_path = ".\\Models\\{}_epochs_relu".format(num_epochs)
     torch.save(model.state_dict(), save_path)
     print("Saving model to {}".format(save_path))
+
+
+def linsig_train(training_loader, num_inputs, num_epochs):
+    model = Lin_Relu(num_inputs)
+
+    # Testing different Loss functions
+    # criterion = torch.nn.BCELoss(size_average= True)
+    criterion = torch.nn.MSELoss(size_average=True)
+    # criterion = torch.nn.CrossEntropyLoss(size_average=True)
+    # criterion = torch.nn.KLDivLoss(size_average=True)
+
+    # Testing different optimizers
+    optimizer = torch.optim.Adagrad(model.parameters(), lr = 0.01)
+    # optimizer = torch.optim.Rprop(model.parameters(), lr=0.01)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+    for epoch in range(num_epochs):
+        for i, data in enumerate(training_loader):
+            # get the inputs and results
+            inputs, labels = data
+
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+
+            y_pred = model(inputs)
+
+            # Compute and print loss
+            loss = criterion(y_pred, labels)
+
+            # Print loss for every 10th batch
+            if i % 8 == 0 and epoch % 2 == 0:
+                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+
+            # Zero gradients, perform a backward pass, and update the weights.
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+
+    save_path = ".\\Models\\{}_epochs_linsig".format(num_epochs)
+    torch.save(model.state_dict(), save_path)
+    print("Saving model to {}".format(save_path))
+

@@ -331,8 +331,8 @@ if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG)
     year = 2018
 
-    model = training.Lin_Sig(12)
-    model = test_model.load_model(".\\Models\\5000_epochs", model)
+    model = training.Lin_Relu(20)
+    model = test_model.load_model(".\\Models\\500_epochs", model)
     # model = test_model.load_model(".\\Models\\5_epochs", model)
 
     kp_df = kenpom_df(".\\Training_Data\\KenPom_Complete.csv", year)

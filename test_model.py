@@ -53,7 +53,7 @@ def run_validation(model_path):
 
     training_loader, num_inputs = get_testdata()
 
-    model = training.Lin_Sig(num_inputs)
+    model = training.Lin_Relu(num_inputs)
 
     load_model(model_path, model)
 

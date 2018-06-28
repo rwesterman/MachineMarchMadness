@@ -1,18 +1,27 @@
 from torch.utils.data import DataLoader
 
 from dataload import Match_Winners
-from training import linsig_train
+from training import linrelu_train, linsig_train
 
-import test_model
 import logging
 
-def test_sig(filepath, num_epochs, test_diff = False):
+def test_sig(filepath, num_epochs, model_choice, test_diff = False):
     dataset = Match_Winners(r"./Training_Data/Training_Set.csv", test_diff)
     num_inputs = dataset.x_data.shape[1]
     training_loader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers = 4)
-    linsig_train(training_loader, num_inputs, num_epochs)
+
+    if model_choice == 1:
+        linsig_train(training_loader, num_inputs, num_epochs)
+    elif model_choice == 2:
+        linrelu_train(training_loader, num_inputs, num_epochs)
 
 def epoch_input():
+    print("Training model for March Madness.")
+    print("There are currently 2 training models.\n1)Linear Sigmoid model\n2)ReLU model")
+    model_choice = int(input("Please enter 1 or 2 for the model you'd like to use: "))
+    if not (model_choice == 1 or model_choice == 2):
+        input("Invalid entry. Please enter 1 or 2 for the model you'd like to use: ")
+
     try:
         epochs = int(input("How many epochs should be run?: "))
     except (TypeError,ValueError) as e:
@@ -21,10 +30,10 @@ def epoch_input():
 
     if epochs > 0:
         print("Running {} epochs".format(epochs))
-        test_sig(r"./Training_Data/Training_Set.csv", epochs)
+        test_sig(r"./Training_Data/Training_Set.csv", epochs, model_choice)
     else:
         print("Defaulting to 100 epochs.")
-        test_sig(r"./Training_Data/Training_Set.csv", 100)
+        test_sig(r"./Training_Data/Training_Set.csv", 100, model_choice)
 
 if __name__ == '__main__':
     # Setup output to log file and to stdout
@@ -33,6 +42,3 @@ if __name__ == '__main__':
 
     # Use this to ask user for number of epochs to run
     epoch_input()
-
-    # test_model.run_validation(".\\Models\\5000_epochs")
-

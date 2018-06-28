@@ -8,3 +8,5 @@ Training_Data/Practice_Training_Set.xlsx
 
 Accuracy_results.txt
 *geckodriver.log
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
