@@ -4,6 +4,51 @@ import os
 import pandas as pd
 from setup.data_classes import Data_Frames
 
+def normalize_training_set(filepath):
+    train_data = pd.read_csv(filepath)
+
+    print(train_data.head())
+
+    ignore_columns = ["Winner", "Score1", "Score2", "Score_Diff"]
+
+    for column in train_data:
+        # Get max and min values from the column in question
+        max = train_data[column].max()
+        min = train_data[column].min()
+
+        if type(max) == str:
+            # If on a column of string values, move to next column
+            continue
+
+        elif column in ignore_columns:
+            # Ignore non-training columns
+            continue
+
+        # normalize all data in the column
+        train_data[column] = train_data[column].apply(normalize_data, args = (max, min))
+
+
+    train_data.to_csv(".\\Training_Data\\Training_Set_Normalized.csv", index = False)
+
+
+def normalize_data(value, max, min):
+    """Normalizes every value in a column between [-1,1]"""
+
+    # Get max and min values in the column
+
+    try:
+        max = float(max)
+        min = float(min)
+
+    except ValueError as e:
+        logging.warning("Cannot normalize strings")
+
+    # formula for normalizing data between -1 and 1
+    # found at: https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+    return 2*((value - min)/(max - min)) - 1
+
+
+
 
 def compile_data(start_year, end_year, result_path, comb_df, match_data):
 
@@ -28,12 +73,7 @@ def compile_data(start_year, end_year, result_path, comb_df, match_data):
                       f"{single_match['Team.1']} from year {single_match['Year']}")
                 print(f"KeyError: {e}")
 
-
-if __name__ == '__main__':
-    logging.basicConfig(level = logging.INFO)
-    # Delete existing training set if it exists
-
-
+def prepare_compile():
     kp_path = ".\\Training_Data\\KenPom_Complete.csv"
     bpi_path = ".\\Training_Data\\ESPN_BPI.csv"
     elo_path = ".\\Training_Data\\elo_rankings.csv"
@@ -58,3 +98,11 @@ if __name__ == '__main__':
 
     # bpi_df = standardize_data.standardize_teams(match_df, bpi_df, 2008)
     # bpi_df.to_csv(".\\Training_Data\\ESPN_BPI.csv", index = False)
+
+if __name__ == '__main__':
+    logging.basicConfig(level = logging.DEBUG)
+    # Delete existing training set if it exists
+
+    normalize_training_set(".\\Training_Data\\Training_Set.csv")
+    # prepare_compile()
+

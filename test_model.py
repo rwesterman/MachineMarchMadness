@@ -58,3 +58,7 @@ def run_validation(model_path):
     load_model(model_path, model)
 
     accuracy = validate_sig(training_loader, model)
+
+if __name__ == '__main__':
+    model_path = input("Type full path to model for testing: ")
+    run_validation(model_path)

@@ -1,21 +1,35 @@
 from torch.utils.data import DataLoader
 
+import matplotlib.pyplot as plt
+
 from dataload import Match_Winners
 from training import linrelu_train, linsig_train, binclass_train
+from test_model import validate_sig
 
 import logging
 
+def plot_loss(x_vals, y_vals):
+
+    # plt.scatter(x_vals, y_vals)
+    plt.plot(x_vals, y_vals)
+    plt.show()
+
 def test_sig(filepath, num_epochs, model_choice, test_diff = False):
-    dataset = Match_Winners(r"./Training_Data/Training_Set.csv", test_diff)
+    # Testing now with normalized data
+    dataset = Match_Winners(r"./Training_Data/Training_Set_Normalized.csv", test_diff)
     num_inputs = dataset.x_data.shape[1]
     training_loader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers = 4)
 
     if model_choice == 1:
-        linsig_train(training_loader, num_inputs, num_epochs)
+        loss_list = linsig_train(training_loader, num_inputs, num_epochs)
     elif model_choice == 2:
-        linrelu_train(training_loader, num_inputs, num_epochs)
+        loss_list = linrelu_train(training_loader, num_inputs, num_epochs)
     elif model_choice == 3:
-        binclass_train(training_loader, num_inputs, num_epochs)
+        loss_list = binclass_train(training_loader, num_inputs, num_epochs)
+
+    x_vals = [x for x in range(num_epochs)]
+    plot_loss(x_vals, loss_list)
+
 
 def epoch_input():
     print("Training model for March Madness.")
@@ -43,4 +57,8 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
 
     # Use this to ask user for number of epochs to run
-    epoch_input()
+    # epoch_input()
+
+    test_sig(r"./Training_Data/Training_Set.csv", 50, 2)
+
+

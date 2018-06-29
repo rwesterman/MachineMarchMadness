@@ -46,7 +46,7 @@ class Lin_Sig(nn.Module):
 
     def forward(self, x):
         x.view()
-        out1 = self.sigmoid(self.lin1(x))
+        out1 = self.lin1(x)
         out2 = self.sigmoid(self.lin2(out1))
         out3 = self.sigmoid(self.lin3(out2))
         y_pred = self.sigmoid(self.lin4(out3))
@@ -72,15 +72,19 @@ class Lin_Relu(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax()
         self.relu = nn.ReLU()
+        self.prelu = nn.PReLU()
+        self.lrelu = nn.LeakyReLU()
+        self.soft = nn.Softmax()
 
     def forward(self, x):
 
-        out1 = self.relu(self.lin1(x))
+        out1 = self.lin1(x)
         out2 = self.relu(self.lin2(out1))
         out3 = self.relu(self.lin3(out2))
         out4 = self.relu(self.lin4(out3))
         out5 = self.relu(self.lin5(out4))
         out6 = self.relu(self.lin6(out5))
+        # y_pred = self.soft(self.lin7(out6))
         y_pred = self.sigmoid(self.lin7(out6))
 
         return y_pred
@@ -88,8 +92,11 @@ class Lin_Relu(nn.Module):
 def binclass_train(training_loader, num_inputs, num_epochs):
     model = Binary_Classifier(num_inputs)
 
+    loss_list = []
+
     # set up Cuda device if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Training with device {}".format(device))
     model = model.to(device)
 
     # Testing different Loss functions
@@ -119,16 +126,15 @@ def binclass_train(training_loader, num_inputs, num_epochs):
 
             # Compute and print loss
             loss = criterion(y_pred, labels)
-
             # Print loss for every 10th batch
             if i == 0:
                 current_time = time.time()
                 elapsed_time = current_time - start_time
                 epochs_remaining = num_epochs - epoch
                 time_remaining = ((elapsed_time/(epoch + 1)) * epochs_remaining)/60
-                logging.info("{:.1f} minutes elapsed\t\testimated minutes remaining is {:.1f}".format(elapsed_time/60, time_remaining))
-                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+                logging.info("Epoch: {}, loss: {:.4f}, Minutes elapsed: {:.1f}, Minutes remaining: {:.1f}".format(epoch, loss.item(), elapsed_time/60, time_remaining))
 
+                loss_list.append(loss.item())
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
             loss.backward()
@@ -139,8 +145,25 @@ def binclass_train(training_loader, num_inputs, num_epochs):
     torch.save(model.state_dict(), save_path)
     print("Saving model to {}".format(save_path))
 
+    return loss_list
+
 def linrelu_train(training_loader, num_inputs, num_epochs):
+    """
+    Trains neural network based on Lin_Relu class, then returns list of loss for each epoch
+    :param training_loader: Dataloader object to pass training data to model
+    :param num_inputs: Number of inputs (This is variable based on data being used)
+    :param num_epochs: Number of epochs to run the training data
+    :return: List of loss values
+    """
+
     model = Lin_Relu(num_inputs)
+
+    # set up Cuda device if available
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Training with device {}".format(device))
+    model = model.to(device)
+
+    loss_list = []
 
     # Testing different Loss functions
     criterion = nn.MSELoss(size_average=True)
@@ -152,6 +175,8 @@ def linrelu_train(training_loader, num_inputs, num_epochs):
     # optimizer = torch.optim.Rprop(model.parameters(), lr=0.01)
     # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
+    start_time = time.time()
+
     for epoch in range(num_epochs):
         for i, data in enumerate(training_loader):
             # get the inputs and results
@@ -159,6 +184,7 @@ def linrelu_train(training_loader, num_inputs, num_epochs):
 
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
+            inputs, labels = inputs.to(device), labels.to(device)
 
             y_pred = model(inputs)
 
@@ -166,8 +192,15 @@ def linrelu_train(training_loader, num_inputs, num_epochs):
             loss = criterion(y_pred, labels)
 
             # Print loss for every 10th batch
-            if i % 8 == 0 and epoch % 2 == 0:
-                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+            if i == 0:
+
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                epochs_remaining = num_epochs - epoch
+                time_remaining = ((elapsed_time/(epoch + 1)) * epochs_remaining)/60
+                logging.info("Epoch: {}, loss: {:.4f}, Minutes elapsed: {:.1f}, Minutes remaining: {:.1f}".format(epoch, loss.item(), elapsed_time/60, time_remaining))
+
+                loss_list.append(loss.item())
 
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
@@ -186,10 +219,18 @@ def linrelu_train(training_loader, num_inputs, num_epochs):
     torch.save(model.state_dict(), save_path)
     print("Saving model to {}".format(save_path))
 
+    return loss_list
+
 
 def linsig_train(training_loader, num_inputs, num_epochs):
     model = Lin_Relu(num_inputs)
 
+    # set up Cuda device if available
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Training with device {}".format(device))
+    model = model.to(device)
+
+    loss_list = []
     # Testing different Loss functions
     # criterion = nn.BCELoss(size_average= True)
     criterion = nn.MSELoss(size_average=True)
@@ -201,6 +242,8 @@ def linsig_train(training_loader, num_inputs, num_epochs):
     # optimizer = torch.optim.Rprop(model.parameters(), lr=0.01)
     # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
+    start_time = time.time()
+
     for epoch in range(num_epochs):
         for i, data in enumerate(training_loader):
             # get the inputs and results
@@ -208,6 +251,8 @@ def linsig_train(training_loader, num_inputs, num_epochs):
 
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
+            # Sending data to CUDA device if possible
+            inputs, labels = inputs.to(device), labels.to(device)
 
             y_pred = model(inputs)
 
@@ -215,8 +260,15 @@ def linsig_train(training_loader, num_inputs, num_epochs):
             loss = criterion(y_pred, labels)
 
             # Print loss for every 10th batch
-            if i % 8 == 0 and epoch % 2 == 0:
-                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+            if i == 0:
+
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                epochs_remaining = num_epochs - epoch
+                time_remaining = ((elapsed_time/(epoch + 1)) * epochs_remaining)/60
+                logging.info("Epoch: {}, loss: {:.4f}, Minutes elapsed: {:.1f}, Minutes remaining: {:.1f}".format(epoch, loss.item(), elapsed_time/60, time_remaining))
+
+                loss_list.append(loss.item())
 
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
@@ -228,8 +280,4 @@ def linsig_train(training_loader, num_inputs, num_epochs):
     torch.save(model.state_dict(), save_path)
     print("Saving model to {}".format(save_path))
 
-
-if __name__ == '__main__':
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(device)
-    # We do have a cuda device. Now to set up network to run with CUDA
+    return loss_list
