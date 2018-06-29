@@ -12,10 +12,10 @@ class Binary_Classifier(nn.Module):
 
     def __init__(self, num_inputs):
         super().__init__()
-        self.fc1 = nn.Linear(num_inputs, 50)
+        self.fc1 = nn.Linear(num_inputs, 600)
         self.relu1 = nn.ReLU()
         self.dout = nn.Dropout(0.2)
-        self.fc2 = nn.Linear(50, 100)
+        self.fc2 = nn.Linear(600, 100)
         self.prelu = nn.PReLU(1)
         self.out = nn.Linear(100, 1)
         self.out_act = nn.Sigmoid()
@@ -125,8 +125,8 @@ def binclass_train(training_loader, num_inputs, num_epochs):
                 current_time = time.time()
                 elapsed_time = current_time - start_time
                 epochs_remaining = num_epochs - epoch
-                time_per_epoch = elapsed_time/epoch
-                logging.info("{} seconds elapsed\t\testimated time remaining is {}".format(elapsed_time, time_per_epoch * epochs_remaining))
+                time_remaining = ((elapsed_time/(epoch + 1)) * epochs_remaining)/60
+                logging.info("{:.1f} minutes elapsed\t\testimated minutes remaining is {:.1f}".format(elapsed_time/60, time_remaining))
                 logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
 
             # Zero gradients, perform a backward pass, and update the weights.
