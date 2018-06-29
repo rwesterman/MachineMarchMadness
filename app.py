@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 
 from dataload import Match_Winners
-from training import linrelu_train, linsig_train
+from training import linrelu_train, linsig_train, binclass_train
 
 import logging
 
@@ -14,13 +14,15 @@ def test_sig(filepath, num_epochs, model_choice, test_diff = False):
         linsig_train(training_loader, num_inputs, num_epochs)
     elif model_choice == 2:
         linrelu_train(training_loader, num_inputs, num_epochs)
+    elif model_choice == 3:
+        binclass_train(training_loader, num_inputs, num_epochs)
 
 def epoch_input():
     print("Training model for March Madness.")
-    print("There are currently 2 training models.\n1)Linear Sigmoid model\n2)ReLU model")
-    model_choice = int(input("Please enter 1 or 2 for the model you'd like to use: "))
-    if not (model_choice == 1 or model_choice == 2):
-        input("Invalid entry. Please enter 1 or 2 for the model you'd like to use: ")
+    print("There are currently 2 training models.\n1)Linear Sigmoid model\n2)ReLU model\n3)Binary Classifier")
+    model_choice = int(input("Please enter 1, 2, or 3 for the model you'd like to use: "))
+    if not (1 <= model_choice <= 3):
+        input("Invalid entry. Please enter 1, 2, or 3 for the model you'd like to use: ")
 
     try:
         epochs = int(input("How many epochs should be run?: "))

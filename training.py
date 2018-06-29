@@ -1,23 +1,47 @@
 import torch
+from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import logging
 
 from dataload import Match_Winners
 
-class Lin_Sig(torch.nn.Module):
+# Taken from example: https://gist.github.com/santi-pdp/d0e9002afe74db04aa5bbff6d076e8fe
+class Binary_Classifier(nn.Module):
+
+    def __init__(self, num_inputs):
+        super().__init__()
+        self.fc1 = nn.Linear(num_inputs, 50)
+        self.relu1 = nn.ReLU()
+        self.dout = nn.Dropout(0.2)
+        self.fc2 = nn.Linear(50, 100)
+        self.prelu = nn.PReLU(1)
+        self.out = nn.Linear(100, 1)
+        self.out_act = nn.Sigmoid()
+
+    def forward(self, x):
+        a1 = self.fc1(x)
+        h1 = self.relu1(a1)
+        dout = self.dout(h1)
+        a2 = self.fc2(dout)
+        h2 = self.prelu(a2)
+        a3 = self.out(h2)
+        y = self.out_act(a3)
+        return y
+
+class Lin_Sig(nn.Module):
 
     def __init__(self, num_inputs):
         super().__init__()
 
         # Making three-deep neural network with 12 inputs
         # 12 inputs in x_data. Arbitrary output 8
-        self.lin1 = torch.nn.Linear(num_inputs, 200)
-        self.lin2 = torch.nn.Linear(200, 100)
-        self.lin3 = torch.nn.Linear(100, 60)
-        self.lin4 = torch.nn.Linear(60, 1)
+        self.lin1 = nn.Linear(num_inputs, 200)
+        self.lin2 = nn.Linear(200, 100)
+        self.lin3 = nn.Linear(100, 60)
+        self.lin4 = nn.Linear(60, 1)
 
-        self.sigmoid = torch.nn.Sigmoid()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x.view()
@@ -29,24 +53,24 @@ class Lin_Sig(torch.nn.Module):
         return y_pred
 
 
-class Lin_Relu(torch.nn.Module):
+class Lin_Relu(nn.Module):
 
     def __init__(self, num_inputs):
         super().__init__()
 
         # Making three-deep neural network with 12 inputs
         # 12 inputs in x_data. Arbitrary output 8
-        self.lin1 = torch.nn.Linear(num_inputs, 200)
-        self.lin2 = torch.nn.Linear(200, 100)
-        self.lin3 = torch.nn.Linear(100, 60)
-        self.lin4 = torch.nn.Linear(60, 100)
-        self.lin5 = torch.nn.Linear(100, 80)
-        self.lin6 = torch.nn.Linear(80, 60)
-        self.lin7 = torch.nn.Linear(60, 1)
+        self.lin1 = nn.Linear(num_inputs, 200)
+        self.lin2 = nn.Linear(200, 100)
+        self.lin3 = nn.Linear(100, 60)
+        self.lin4 = nn.Linear(60, 100)
+        self.lin5 = nn.Linear(100, 80)
+        self.lin6 = nn.Linear(80, 60)
+        self.lin7 = nn.Linear(60, 1)
 
-        self.sigmoid = torch.nn.Sigmoid()
-        self.softmax = torch.nn.Softmax()
-        self.relu = torch.nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+        self.softmax = nn.Softmax()
+        self.relu = nn.ReLU()
 
     def forward(self, x):
 
@@ -60,14 +84,60 @@ class Lin_Relu(torch.nn.Module):
 
         return y_pred
 
+def binclass_train(training_loader, num_inputs, num_epochs):
+    model = Binary_Classifier(num_inputs)
+
+    # set up Cuda device if available
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    # Testing different Loss functions
+    criterion = nn.BCELoss(size_average= True)
+    # criterion = nn.MSELoss(size_average=True)
+    # criterion = nn.CrossEntropyLoss(size_average=True)
+    # criterion = nn.KLDivLoss(size_average=True)
+
+    # Testing different optimizers
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.01)
+    # optimizer = torch.optim.Rprop(model.parameters(), lr=0.01)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+    for epoch in range(num_epochs):
+        for i, data in enumerate(training_loader):
+            # get the inputs and results
+            inputs, labels = data
+
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+            inputs, labels = inputs.to(device), labels.to(device)
+
+
+            y_pred = model(inputs)
+
+            # Compute and print loss
+            loss = criterion(y_pred, labels)
+
+            # Print loss for every 10th batch
+            if i % 8 == 0 and epoch % 2 == 0:
+                logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
+
+            # Zero gradients, perform a backward pass, and update the weights.
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+
+    save_path = ".\\Models\\{}_epochs_binary_classifier".format(num_epochs)
+    torch.save(model.state_dict(), save_path)
+    print("Saving model to {}".format(save_path))
 
 def linrelu_train(training_loader, num_inputs, num_epochs):
     model = Lin_Relu(num_inputs)
 
     # Testing different Loss functions
-    criterion = torch.nn.MSELoss(size_average=True)
-    # criterion = torch.nn.CrossEntropyLoss(size_average=True)
-    # criterion = torch.nn.KLDivLoss(size_average=True)
+    criterion = nn.MSELoss(size_average=True)
+    # criterion = nn.CrossEntropyLoss(size_average=True)
+    # criterion = nn.KLDivLoss(size_average=True)
 
     # Testing different optimizers
     optimizer = torch.optim.Adagrad(model.parameters(), lr = 0.01)
@@ -113,10 +183,10 @@ def linsig_train(training_loader, num_inputs, num_epochs):
     model = Lin_Relu(num_inputs)
 
     # Testing different Loss functions
-    # criterion = torch.nn.BCELoss(size_average= True)
-    criterion = torch.nn.MSELoss(size_average=True)
-    # criterion = torch.nn.CrossEntropyLoss(size_average=True)
-    # criterion = torch.nn.KLDivLoss(size_average=True)
+    # criterion = nn.BCELoss(size_average= True)
+    criterion = nn.MSELoss(size_average=True)
+    # criterion = nn.CrossEntropyLoss(size_average=True)
+    # criterion = nn.KLDivLoss(size_average=True)
 
     # Testing different optimizers
     optimizer = torch.optim.Adagrad(model.parameters(), lr = 0.01)
@@ -150,3 +220,8 @@ def linsig_train(training_loader, num_inputs, num_epochs):
     torch.save(model.state_dict(), save_path)
     print("Saving model to {}".format(save_path))
 
+
+if __name__ == '__main__':
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
+    # We do have a cuda device. Now to set up network to run with CUDA
