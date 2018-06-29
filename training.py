@@ -3,6 +3,7 @@ from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import logging
+import time
 
 from dataload import Match_Winners
 
@@ -102,6 +103,8 @@ def binclass_train(training_loader, num_inputs, num_epochs):
     # optimizer = torch.optim.Rprop(model.parameters(), lr=0.01)
     # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
+    start_time = time.time()
+
     for epoch in range(num_epochs):
         for i, data in enumerate(training_loader):
             # get the inputs and results
@@ -118,7 +121,12 @@ def binclass_train(training_loader, num_inputs, num_epochs):
             loss = criterion(y_pred, labels)
 
             # Print loss for every 10th batch
-            if i % 8 == 0 and epoch % 2 == 0:
+            if i == 0:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                epochs_remaining = num_epochs - epoch
+                time_per_epoch = elapsed_time/epoch
+                logging.info("{} seconds elapsed\t\testimated time remaining is {}".format(elapsed_time, time_per_epoch * epochs_remaining))
                 logging.info("Epoch: {}, batch #: {}, loss: {:.5f}".format(epoch, i, loss.item()))
 
             # Zero gradients, perform a backward pass, and update the weights.
